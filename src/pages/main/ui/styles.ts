@@ -22,6 +22,10 @@ export const styles = css`
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
         gap: var(--padding);
+
+        @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+        }
     }
 
     .table {
