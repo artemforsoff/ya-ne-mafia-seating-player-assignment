@@ -1,6 +1,6 @@
 import './styles/index.scss';
-import { Router } from './routing';
+import { pages } from '@/pages';
 
 export const App = () => {
-    return <Router />;
+    return <pages.MainPage />;
 };
