@@ -1,14 +1,20 @@
 import { useFormik } from 'formik';
-import { SeatingConfiguration, SeatingConfigurationPlayer, SeatingConfigurationTable } from '../types';
+import type { SeatingConfiguration, SeatingConfigurationPlayer, SeatingConfigurationTable } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import * as yup from 'yup';
 import { shuffleArray } from '@/shared/lib';
+import { useEffect } from 'react';
+import { SEATING_CONFIGURATION_LS_KEY } from '@/shared/constants';
+
+const defaultInitialValues: SeatingConfiguration = {
+    tables: [],
+};
 
 export const useCreatingSeatingConfiguration = () => {
     const form = useFormik<SeatingConfiguration>({
-        initialValues: {
-            tables: [],
-        },
+        initialValues: JSON.parse(
+            localStorage.getItem(SEATING_CONFIGURATION_LS_KEY) || JSON.stringify(defaultInitialValues)
+        ),
         onSubmit: () => {},
         validationSchema: yup.object().shape({
             tables: yup.array().of(
@@ -33,6 +39,12 @@ export const useCreatingSeatingConfiguration = () => {
             ),
         }),
     });
+
+    const { values } = form;
+
+    useEffect(() => {
+        localStorage.setItem(SEATING_CONFIGURATION_LS_KEY, JSON.stringify(values));
+    }, [values]);
 
     const createTable = () => {
         form.setFieldValue(
@@ -83,5 +95,37 @@ export const useCreatingSeatingConfiguration = () => {
         }
     };
 
-    return { form, createTable, createPlayers, generatePlaceNumbers };
+    const deleteTable = (tableId: SeatingConfigurationTable['id']) => {
+        form.setFieldValue(
+            `tables`,
+            form.values.tables.filter((table) => table.id !== tableId)
+        );
+    };
+
+    const shuffleTables = () => {
+        const allPlayerNames = shuffleArray(
+            form.values.tables.map((table) => table.players.map((player) => player.name)).flat()
+        );
+
+        form.setFieldValue(
+            'tables',
+            form.values.tables.map((table) => {
+                return {
+                    ...table,
+                    players: table.players.map((player) => {
+                        const name = allPlayerNames[0];
+
+                        allPlayerNames.shift();
+
+                        return {
+                            ...player,
+                            name,
+                        };
+                    }),
+                };
+            })
+        );
+    };
+
+    return { form, createTable, createPlayers, generatePlaceNumbers, deleteTable, shuffleTables };
 };

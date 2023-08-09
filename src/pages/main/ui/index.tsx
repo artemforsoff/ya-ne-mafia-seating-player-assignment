@@ -1,19 +1,42 @@
-import { Button, TextField, Badge } from '@mui/material';
+import { Button, TextField, Badge, IconButton } from '@mui/material';
 import { FormikErrors } from 'formik';
 import { useCreatingSeatingConfiguration } from '../hooks';
 import { SeatingConfigurationPlayer, SeatingConfigurationTable } from '../types';
 import { styles } from './styles';
-import EventSeatIcon from '@mui/icons-material/EventSeat';
+import { EventSeat as EventSeatIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { useState } from 'react';
+import { ConfirmDeleteTableModal } from './confirm-delete-table-modal';
+import { Nullable } from '@/shared/utility-types';
 
 export const MainPage = () => {
-    const { form, createTable, createPlayers, generatePlaceNumbers } = useCreatingSeatingConfiguration();
+    const { form, createTable, createPlayers, generatePlaceNumbers, deleteTable, shuffleTables } =
+        useCreatingSeatingConfiguration();
+
+    const [isOpenModal, setIsOpenModal] = useState(false);
+    const [tableIdForDeleting, setTableIdForDeleting] =
+        useState<Nullable<SeatingConfigurationTable['id']>>(null);
 
     return (
         <div className={styles}>
+            <ConfirmDeleteTableModal
+                open={isOpenModal}
+                handleClose={() => setIsOpenModal(false)}
+                handleConfirm={() => {
+                    if (tableIdForDeleting) deleteTable(tableIdForDeleting);
+                    setIsOpenModal(false);
+                }}
+            />
+
             <header>
                 <Button variant="contained" onClick={createTable} disabled={!form.isValid}>
                     Створити стіл
                 </Button>
+
+                {form.values.tables.length > 1 && (
+                    <Button variant="contained" onClick={shuffleTables} disabled={!form.isValid}>
+                        Перемішати столи
+                    </Button>
+                )}
             </header>
 
             <main>
@@ -29,10 +52,21 @@ export const MainPage = () => {
 
                         return (
                             <li key={table.id} className="table">
+                                <IconButton
+                                    className="btn-delete-table"
+                                    aria-label="Видалити стіл"
+                                    onClick={() => {
+                                        setIsOpenModal(true);
+                                        setTableIdForDeleting(table.id);
+                                    }}
+                                >
+                                    <DeleteIcon />
+                                </IconButton>
+
                                 <div className="table__head">
                                     <TextField
                                         size="small"
-                                        className="field-players-count"
+                                        className="text-field"
                                         required
                                         label="Кількість гравців"
                                         variant="outlined"
@@ -86,6 +120,7 @@ export const MainPage = () => {
 
                                                                 <TextField
                                                                     size="small"
+                                                                    className="text-field"
                                                                     required
                                                                     label="Ім'я гравця"
                                                                     variant="outlined"

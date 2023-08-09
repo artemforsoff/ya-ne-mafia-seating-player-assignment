@@ -8,6 +8,8 @@ export const styles = css`
     padding: var(--padding);
 
     header {
+        display: flex;
+        gap: var(--padding);
         border-block-end: 1px solid rgba(0, 0, 0, 0.23);
         padding-block-end: var(--padding);
     }
@@ -24,11 +26,31 @@ export const styles = css`
 
     .table {
         padding: var(--padding);
+        padding-block-start: calc(var(--padding) * 1.5);
         border-radius: 5px;
         border: 1px solid rgba(0, 0, 0, 0.23);
         background-color: #f7f7f8;
+        position: relative;
 
-        .field-players-count {
+        .btn-delete-table {
+            position: absolute;
+            right: 0;
+            top: 0;
+            transform: translate(15px, -15px);
+            z-index: 1;
+            background-color: #f7f7f8;
+            border: 1px solid rgba(0, 0, 0, 0.23);
+
+            &:hover {
+                color: #d32f2f;
+            }
+
+            svg {
+                transition: all 200ms ease-in-out;
+            }
+        }
+
+        .text-field {
             background-color: #fff;
         }
 
