@@ -83,15 +83,31 @@ export const useCreatingSeatingConfiguration = () => {
         const tableIndex = form.values.tables.findIndex((table) => table.id === tableId);
 
         if (tableIndex === Math.abs(tableIndex)) {
-            form.setFieldValue(
-                `tables[${tableIndex}].players`,
-                shuffleArray(form.values.tables[tableIndex].players)
+            let players: SeatingConfigurationPlayer[] = [];
+            const generate = () => {
+                players = shuffleArray(form.values.tables[tableIndex].players)
                     .map((player, index) => ({
                         ...player,
                         placeNumber: index + 1,
                     }))
-                    .sort((a, b) => a.placeNumber - b.placeNumber)
-            );
+                    .sort((a, b) => a.placeNumber - b.placeNumber);
+
+                if (
+                    players.length > 2 &&
+                    ['Cat', 'Сat', 'Саt'].some((playerName) =>
+                        players
+                            .slice(0, 2)
+                            .map((player) => player.name.trim().toLowerCase())
+                            .includes(playerName.toLowerCase())
+                    )
+                ) {
+                    generate();
+                }
+            };
+
+            generate();
+
+            form.setFieldValue(`tables[${tableIndex}].players`, players);
         }
     };
 
